@@ -100,6 +100,40 @@ end
 # TODO: Add support for checkbox, select or option
 # based on naming conventions.
 #
+Given /^the following (.+?) exist:$/ do |field, table|
+  # table is a Cucumber::Ast::Table
+  table.hashes.each do |element|
+    if field == "users"
+      User.create(element)
+    elsif field == "articles"
+      Article.create(element)
+    elsif field == "comments"
+      Comment.create(element)
+    end
+  end
+end
+
+Given /^I login as a non\-admin user$/ do
+  visit '/accounts/login'
+  fill_in 'user_login', :with => 'amy'
+  fill_in 'user_password', :with => 'amy123'
+  click_button 'Login'
+  if page.respond_to? :should
+    page.should have_content('Login successful')
+  else
+    assert page.has_content?('Login successful')
+  end
+end
+
+
+When /^I merge "(.*?)" with "(.*?)"$/ do |arg1, arg2|
+  txt = Article.find_by_id(arg1)
+  txt.merge_with(arg2)
+end
+
+
+
+
 When /^(?:|I )fill in the following:$/ do |fields|
   fields.rows_hash.each do |name, value|
     When %{I fill in "#{name}" with "#{value}"}
